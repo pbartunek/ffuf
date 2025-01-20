@@ -5,7 +5,6 @@ import (
 	"compress/flate"
 	"compress/gzip"
 	"crypto/tls"
-	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -64,6 +63,7 @@ func NewSimpleRunner(conf *ffuf.Config, replay bool) ffuf.RunnerProvider {
 			MaxIdleConns:        1000,
 			MaxIdleConnsPerHost: 500,
 			MaxConnsPerHost:     500,
+      DisableKeepAlives:  true,
 			DialContext: (&net.Dialer{
 				Timeout: time.Duration(time.Duration(conf.Timeout) * time.Second),
 			}).DialContext,
@@ -71,7 +71,6 @@ func NewSimpleRunner(conf *ffuf.Config, replay bool) ffuf.RunnerProvider {
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
 				MinVersion:         tls.VersionTLS13,
-				DisableKeepAlives:  true,
 				Renegotiation:      tls.RenegotiateOnceAsClient,
 				ServerName:         conf.SNI,
 				Certificates:       cert,
