@@ -24,6 +24,7 @@ import (
 
 // Download results < 5MB
 const MAX_DOWNLOAD_SIZE = 5242880
+const DEFAULT_USER_AGENT = "curl/7.88.1"
 
 type SimpleRunner struct {
 	config *ffuf.Config
@@ -69,7 +70,8 @@ func NewSimpleRunner(conf *ffuf.Config, replay bool) ffuf.RunnerProvider {
 			TLSHandshakeTimeout: time.Duration(time.Duration(conf.Timeout) * time.Second),
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: true,
-				MinVersion:         tls.VersionTLS10,
+				MinVersion:         tls.VersionTLS13,
+				DisableKeepAlives:  true,
 				Renegotiation:      tls.RenegotiateOnceAsClient,
 				ServerName:         conf.SNI,
 				Certificates:       cert,
@@ -127,7 +129,7 @@ func (r *SimpleRunner) Execute(req *ffuf.Request) (ffuf.Response, error) {
 
 	// set default User-Agent header if not present
 	if _, ok := req.Headers["User-Agent"]; !ok {
-		req.Headers["User-Agent"] = fmt.Sprintf("%s v%s", "Fuzz Faster U Fool", ffuf.Version())
+		req.Headers["User-Agent"] = DEFAULT_USER_AGENT
 	}
 
 	// Handle Go http.Request special cases
@@ -220,7 +222,7 @@ func (r *SimpleRunner) Dump(req *ffuf.Request) ([]byte, error) {
 
 	// set default User-Agent header if not present
 	if _, ok := req.Headers["User-Agent"]; !ok {
-		req.Headers["User-Agent"] = fmt.Sprintf("%s v%s", "Fuzz Faster U Fool", ffuf.Version())
+		req.Headers["User-Agent"] = DEFAULT_USER_AGENT
 	}
 
 	// Handle Go http.Request special cases
